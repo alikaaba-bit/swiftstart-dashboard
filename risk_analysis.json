@@ -1,0 +1,14 @@
+{
+  "risk_metrics": {
+    "revenue_cv": 12.216186403513483,
+    "commission_cv": 58.00201340332376,
+    "top3_concentration": 57.50323314479814,
+    "cash_runway_months": 1.0697201713729618
+  },
+  "unit_economics": {
+    "revenue_per_client": 5158.206401515151,
+    "cost_per_client": 3651.9321212121213,
+    "contribution_margin": 1506.2742803030296,
+    "ltv": 36150.58272727271
+  }
+}
