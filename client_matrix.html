@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftStart - Client Profitability Matrix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .quadrant-star { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 2px solid #22c55e; }
+        .quadrant-workhorse { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; }
+        .quadrant-steady { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 2px solid #3b82f6; }
+        .quadrant-problem { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #ef4444; }
+        .client-card { transition: all 0.2s; cursor: pointer; }
+        .client-card:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .matrix-cell { min-height: 200px; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <header class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-6">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold">Client Profitability Matrix</h1>
+                    <p class="text-purple-200 text-sm mt-1">Identify which clients to grow, optimize, or exit</p>
+                </div>
+                <a href="index.html" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm">← Dashboard</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Stars</p>
+                        <p class="text-2xl font-bold text-green-600">5 clients</p>
+                    </div>
+                    <span class="text-3xl">⭐</span>
+                </div>
+                <p class="text-xs text-gray-400 mt-2">$15,509/mo • High profit, low effort</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-amber-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Workhorses</p>
+                        <p class="text-2xl font-bold text-amber-600">7 clients</p>
+                    </div>
+                    <span class="text-3xl">🐴</span>
+                </div>
+                <p class="text-xs text-gray-400 mt-2">$54,670/mo • High profit, high effort</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Steady</p>
+                        <p class="text-2xl font-bold text-blue-600">10 clients</p>
+                    </div>
+                    <span class="text-3xl">📊</span>
+                </div>
+                <p class="text-xs text-gray-400 mt-2">$17,583/mo • Lower revenue, manageable</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Problem</p>
+                        <p class="text-2xl font-bold text-red-600">0 clients</p>
+                    </div>
+                    <span class="text-3xl">⚠️</span>
+                </div>
+                <p class="text-xs text-gray-400 mt-2">Low revenue, high effort</p>
+            </div>
+        </div>
+
+        <!-- 2x2 Matrix -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Profitability Matrix</h2>
+
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Y-axis label -->
+                <div class="col-span-2 flex">
+                    <div class="w-8 flex items-center justify-center">
+                        <span class="transform -rotate-90 text-sm font-medium text-gray-500 whitespace-nowrap">← Lower Effort | Higher Effort →</span>
+                    </div>
+                    <div class="flex-1 grid grid-cols-2 gap-4">
+                        <!-- Stars (High Revenue, Low Effort) -->
+                        <div class="quadrant-star rounded-xl p-4 matrix-cell">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-green-800">⭐ Stars</h3>
+                                <span class="text-xs bg-green-600 text-white px-2 py-1 rounded">PROTECT & GROW</span>
+                            </div>
+                            <p class="text-xs text-green-700 mb-3">High revenue, low effort = Best clients</p>
+                            <div class="space-y-2">
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">New Option Sports</span><span class="text-green-600">$3,500</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 5 • Margin: 48%</div>
+                                </div>
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">Frankie Rose</span><span class="text-green-600">$3,009</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 5 • Margin: 39%</div>
+                                </div>
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">BeltBro</span><span class="text-green-600">$3,000</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 5 • Margin: 39%</div>
+                                </div>
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">Piper Finn</span><span class="text-green-600">$3,000</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 5 • Margin: 39%</div>
+                                </div>
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">Southwest Archery</span><span class="text-green-600">$3,000</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 5 • Margin: 39%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Workhorses (High Revenue, High Effort) -->
+                        <div class="quadrant-workhorse rounded-xl p-4 matrix-cell">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-amber-800">🐴 Workhorses</h3>
+                                <span class="text-xs bg-amber-600 text-white px-2 py-1 rounded">OPTIMIZE OR REPRICE</span>
+                            </div>
+                            <p class="text-xs text-amber-700 mb-3">High revenue but demanding = Improve efficiency</p>
+                            <div class="space-y-2">
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">Pepper Bras</span><span class="text-amber-600">$15,454</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 10 • Margin: 76% • Commission client</div>
+                                </div>
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">SnapPad</span><span class="text-amber-600">$14,816</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 10 • Margin: 75% • Commission client</div>
+                                </div>
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">Paddletek</span><span class="text-amber-600">$6,635</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 8 • Margin: 56% • Commission client</div>
+                                </div>
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">Nexgen</span><span class="text-amber-600">$6,165</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 6 • Margin: 65% • Commission client</div>
+                                </div>
+                                <div class="text-xs text-amber-700 mt-2">+3 more (Bamboo Little, The Uzzle, Re-Lieved)</div>
+                            </div>
+                        </div>
+
+                        <!-- Steady (Low Revenue, Low Effort) -->
+                        <div class="quadrant-steady rounded-xl p-4 matrix-cell">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-blue-800">📊 Steady</h3>
+                                <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">MAINTAIN OR UPSELL</span>
+                            </div>
+                            <p class="text-xs text-blue-700 mb-3">Lower revenue but easy to manage = Upsell opportunity</p>
+                            <div class="space-y-2">
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">Ohm Store</span><span class="text-blue-600">$2,500</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 4 • Margin: 42%</div>
+                                </div>
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">Arro Athletics</span><span class="text-blue-600">$2,500</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 4 • Margin: 42%</div>
+                                </div>
+                                <div class="client-card bg-white/70 rounded-lg p-2 text-sm">
+                                    <div class="flex justify-between"><span class="font-medium">Animal Ortho Care</span><span class="text-blue-600">$2,000</span></div>
+                                    <div class="text-xs text-gray-500">Effort: 4 • Margin: 27%</div>
+                                </div>
+                                <div class="text-xs text-blue-700 mt-2">+7 more clients at $1,000-$2,000/mo</div>
+                            </div>
+                        </div>
+
+                        <!-- Problem (Low Revenue, High Effort) -->
+                        <div class="quadrant-problem rounded-xl p-4 matrix-cell opacity-50">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-red-800">⚠️ Problem</h3>
+                                <span class="text-xs bg-red-600 text-white px-2 py-1 rounded">REPRICE OR EXIT</span>
+                            </div>
+                            <p class="text-xs text-red-700 mb-3">Low revenue, high effort = Consider firing</p>
+                            <div class="flex items-center justify-center h-24 text-gray-400">
+                                <p class="text-center">No clients currently in this quadrant 🎉</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- X-axis label -->
+                <div class="col-span-2 text-center">
+                    <span class="text-sm font-medium text-gray-500">← Lower Revenue | Higher Revenue →</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scatter Plot -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Revenue vs Effort Visualization</h2>
+            <div style="height: 400px;">
+                <canvas id="scatterChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Detailed Client Table -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Client Profitability Ranking</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b bg-gray-50">
+                            <th class="text-left py-3 px-4">Rank</th>
+                            <th class="text-left py-3 px-4">Client</th>
+                            <th class="text-right py-3 px-4">Revenue</th>
+                            <th class="text-right py-3 px-4">Est. Cost</th>
+                            <th class="text-right py-3 px-4">Est. Profit</th>
+                            <th class="text-right py-3 px-4">Margin</th>
+                            <th class="text-center py-3 px-4">Effort</th>
+                            <th class="text-right py-3 px-4">$/Effort</th>
+                            <th class="text-center py-3 px-4">Quadrant</th>
+                            <th class="text-left py-3 px-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="client-table">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Action Recommendations -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="font-bold text-gray-900 mb-4">🎯 Immediate Actions</h3>
+                <div class="space-y-3">
+                    <div class="flex items-start">
+                        <span class="bg-green-100 text-green-700 rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">1</span>
+                        <div>
+                            <p class="font-medium text-gray-900">Protect your Stars</p>
+                            <p class="text-sm text-gray-500">Schedule QBRs with New Option Sports, Frankie Rose, BeltBro, Piper Finn, Southwest Archery</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="bg-amber-100 text-amber-700 rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">2</span>
+                        <div>
+                            <p class="font-medium text-gray-900">Optimize Workhorse efficiency</p>
+                            <p class="text-sm text-gray-500">Pepper Bras & SnapPad are high-margin but demanding. Create playbooks to reduce effort.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="bg-blue-100 text-blue-700 rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">3</span>
+                        <div>
+                            <p class="font-medium text-gray-900">Upsell Steady clients</p>
+                            <p class="text-sm text-gray-500">10 clients at &lt;$2,500/mo could move to $3,500+ tier with added services</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="bg-red-100 text-red-700 rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">4</span>
+                        <div>
+                            <p class="font-medium text-gray-900">Address unprofitable clients</p>
+                            <p class="text-sm text-gray-500">BioSwiss & Projo Coffee at $1K/mo are break-even. Raise to $1,500 or exit.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="font-bold text-gray-900 mb-4">💰 Revenue Opportunity</h3>
+                <div class="space-y-4">
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <p class="text-sm text-green-700 font-medium">Upsell 5 Steady clients to $3,500/mo</p>
+                        <p class="text-2xl font-bold text-green-600">+$7,500/mo</p>
+                        <p class="text-xs text-green-600">$90K additional annual revenue</p>
+                    </div>
+                    <div class="bg-amber-50 rounded-lg p-4">
+                        <p class="text-sm text-amber-700 font-medium">Add commission to 3 base-only Stars</p>
+                        <p class="text-2xl font-bold text-amber-600">+$3,000/mo</p>
+                        <p class="text-xs text-amber-600">If 10% commission on $30K client sales</p>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-4">
+                        <p class="text-sm text-red-700 font-medium">Raise minimum to $1,500/mo</p>
+                        <p class="text-2xl font-bold text-red-600">+$1,000/mo</p>
+                        <p class="text-xs text-red-600">Or free up capacity for better clients</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ideal Client Profile -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white">
+            <h3 class="font-bold text-xl mb-4">🎯 Ideal Client Profile (Based on Data)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <p class="text-indigo-200 text-sm">Revenue Sweet Spot</p>
+                    <p class="text-2xl font-bold">$3,000 - $5,000/mo</p>
+                    <p class="text-xs text-indigo-300">Base fee without heavy commission tracking</p>
+                </div>
+                <div>
+                    <p class="text-indigo-200 text-sm">Best Client Type</p>
+                    <p class="text-2xl font-bold">Mid-Market Brands</p>
+                    <p class="text-xs text-indigo-300">$500K-$2M Amazon revenue, growth-focused</p>
+                </div>
+                <div>
+                    <p class="text-indigo-200 text-sm">Target Margin</p>
+                    <p class="text-2xl font-bold">40%+</p>
+                    <p class="text-xs text-indigo-300">Effort score 5 or below</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t mt-8 py-4">
+        <div class="max-w-7xl mx-auto px-6 text-center text-sm text-gray-500">
+            SwiftStart Client Profitability Matrix | Generated January 2026
+        </div>
+    </footer>
+
+    <script>
+        // Client data
+        const clients = [
+            {client: 'Pepper Bras', revenue: 15454, cost: 3650, profit: 11804, margin: 76.4, effort: 10, perEffort: 1545, quadrant: 'Workhorse', action: 'Optimize or Reprice', color: '#f59e0b'},
+            {client: 'SnapPad', revenue: 14816, cost: 3650, profit: 11166, margin: 75.4, effort: 10, perEffort: 1482, quadrant: 'Workhorse', action: 'Optimize or Reprice', color: '#f59e0b'},
+            {client: 'Nexgen', revenue: 6165, cost: 2190, profit: 3975, margin: 64.5, effort: 6, perEffort: 1028, quadrant: 'Workhorse', action: 'Optimize or Reprice', color: '#f59e0b'},
+            {client: 'Paddletek', revenue: 6635, cost: 2920, profit: 3715, margin: 56.0, effort: 8, perEffort: 829, quadrant: 'Workhorse', action: 'Optimize or Reprice', color: '#f59e0b'},
+            {client: 'New Option Sports', revenue: 3500, cost: 1825, profit: 1675, margin: 47.9, effort: 5, perEffort: 700, quadrant: 'Star', action: 'Protect & Grow', color: '#22c55e'},
+            {client: 'Bamboo Little', revenue: 4109, cost: 2555, profit: 1554, margin: 37.8, effort: 7, perEffort: 587, quadrant: 'Workhorse', action: 'Optimize or Reprice', color: '#f59e0b'},
+            {client: 'The Uzzle', revenue: 4000, cost: 2555, profit: 1445, margin: 36.1, effort: 7, perEffort: 571, quadrant: 'Workhorse', action: 'Optimize or Reprice', color: '#f59e0b'},
+            {client: 'Re-Lieved', revenue: 3491, cost: 2190, profit: 1301, margin: 37.3, effort: 6, perEffort: 582, quadrant: 'Workhorse', action: 'Optimize or Reprice', color: '#f59e0b'},
+            {client: 'Frankie Rose Cosmetics', revenue: 3009, cost: 1825, profit: 1184, margin: 39.3, effort: 5, perEffort: 602, quadrant: 'Star', action: 'Protect & Grow', color: '#22c55e'},
+            {client: 'BeltBro', revenue: 3000, cost: 1825, profit: 1175, margin: 39.2, effort: 5, perEffort: 600, quadrant: 'Star', action: 'Protect & Grow', color: '#22c55e'},
+            {client: 'Piper Finn', revenue: 3000, cost: 1825, profit: 1175, margin: 39.2, effort: 5, perEffort: 600, quadrant: 'Star', action: 'Protect & Grow', color: '#22c55e'},
+            {client: 'Southwest Archery', revenue: 3000, cost: 1825, profit: 1175, margin: 39.2, effort: 5, perEffort: 600, quadrant: 'Star', action: 'Protect & Grow', color: '#22c55e'},
+            {client: 'Ohm Store', revenue: 2500, cost: 1460, profit: 1040, margin: 41.6, effort: 4, perEffort: 625, quadrant: 'Steady', action: 'Maintain or Upsell', color: '#3b82f6'},
+            {client: 'Arro Athletics', revenue: 2500, cost: 1460, profit: 1040, margin: 41.6, effort: 4, perEffort: 625, quadrant: 'Steady', action: 'Maintain or Upsell', color: '#3b82f6'},
+            {client: 'A Spice Affair', revenue: 2083, cost: 1460, profit: 623, margin: 29.9, effort: 4, perEffort: 521, quadrant: 'Steady', action: 'Maintain or Upsell', color: '#3b82f6'},
+            {client: 'Animal Ortho Care', revenue: 2000, cost: 1460, profit: 540, margin: 27.0, effort: 4, perEffort: 500, quadrant: 'Steady', action: 'Maintain or Upsell', color: '#3b82f6'},
+            {client: 'Lo & Sons', revenue: 2000, cost: 1460, profit: 540, margin: 27.0, effort: 4, perEffort: 500, quadrant: 'Steady', action: 'Maintain or Upsell', color: '#3b82f6'},
+            {client: 'G1 Nutrition', revenue: 1500, cost: 1095, profit: 405, margin: 27.0, effort: 3, perEffort: 500, quadrant: 'Steady', action: 'Maintain or Upsell', color: '#3b82f6'},
+            {client: 'Braxley Bands', revenue: 1500, cost: 1095, profit: 405, margin: 27.0, effort: 3, perEffort: 500, quadrant: 'Steady', action: 'Maintain or Upsell', color: '#3b82f6'},
+            {client: 'Mountain Hound', revenue: 1500, cost: 1095, profit: 405, margin: 27.0, effort: 3, perEffort: 500, quadrant: 'Steady', action: 'Maintain or Upsell', color: '#3b82f6'},
+            {client: 'BioSwiss', revenue: 1000, cost: 1095, profit: -95, margin: -9.5, effort: 3, perEffort: 333, quadrant: 'Steady', action: 'Reprice', color: '#ef4444'},
+            {client: 'Projo Coffee', revenue: 1000, cost: 1095, profit: -95, margin: -9.5, effort: 3, perEffort: 333, quadrant: 'Steady', action: 'Reprice', color: '#ef4444'},
+        ];
+
+        // Populate table
+        const tbody = document.getElementById('client-table');
+        clients.forEach((c, i) => {
+            const marginClass = c.margin > 40 ? 'text-green-600' : c.margin > 20 ? 'text-amber-600' : 'text-red-600';
+            const quadrantBg = c.quadrant === 'Star' ? 'bg-green-100 text-green-700' :
+                              c.quadrant === 'Workhorse' ? 'bg-amber-100 text-amber-700' :
+                              c.quadrant === 'Steady' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700';
+
+            tbody.innerHTML += `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 px-4 font-medium">${i + 1}</td>
+                    <td class="py-3 px-4 font-medium">${c.client}</td>
+                    <td class="text-right py-3 px-4">$${c.revenue.toLocaleString()}</td>
+                    <td class="text-right py-3 px-4 text-gray-500">$${c.cost.toLocaleString()}</td>
+                    <td class="text-right py-3 px-4 font-medium ${c.profit >= 0 ? 'text-green-600' : 'text-red-600'}">$${c.profit.toLocaleString()}</td>
+                    <td class="text-right py-3 px-4 ${marginClass}">${c.margin.toFixed(1)}%</td>
+                    <td class="text-center py-3 px-4">${c.effort}/10</td>
+                    <td class="text-right py-3 px-4">$${c.perEffort}</td>
+                    <td class="text-center py-3 px-4"><span class="text-xs px-2 py-1 rounded ${quadrantBg}">${c.quadrant}</span></td>
+                    <td class="py-3 px-4 text-sm text-gray-600">${c.action}</td>
+                </tr>
+            `;
+        });
+
+        // Scatter chart
+        const ctx = document.getElementById('scatterChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Clients',
+                    data: clients.map(c => ({x: c.effort, y: c.revenue, client: c.client})),
+                    backgroundColor: clients.map(c => c.color),
+                    pointRadius: clients.map(c => Math.max(8, c.profit / 500)),
+                    pointHoverRadius: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const c = clients[ctx.dataIndex];
+                                return `${c.client}: $${c.revenue.toLocaleString()}/mo, Effort: ${c.effort}, Profit: $${c.profit.toLocaleString()}`;
+                            }
+                        }
+                    },
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Effort Score (1-10)' },
+                        min: 0,
+                        max: 12
+                    },
+                    y: {
+                        title: { display: true, text: 'Monthly Revenue ($)' },
+                        ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'K' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
