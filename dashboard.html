@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftStart Agency - Financial Dashboard 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        /* SwiftStart Commerce Theme */
+        :root {
+            --swift-navy: #232F3E;
+            --swift-orange: #FF9900;
+            --swift-orange-dark: #E88B00;
+            --swift-slate: #37475A;
+            --swift-white: #F5F7FA;
+            --swift-success: #00A86B;
+            --swift-danger: #D13212;
+            --swift-info: #007EB9;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--swift-white);
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(35,47,62,0.1), 0 1px 2px rgba(35,47,62,0.06);
+            transition: all 0.2s;
+            border: 1px solid rgba(35,47,62,0.08);
+        }
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(35,47,62,0.1), 0 4px 6px -2px rgba(35,47,62,0.05);
+            border-color: rgba(255,153,0,0.3);
+        }
+        .metric-card {
+            background: linear-gradient(135deg, var(--swift-navy) 0%, var(--swift-slate) 100%);
+        }
+        .profit-positive { color: var(--swift-success); }
+        .profit-negative { color: var(--swift-danger); }
+        .chart-container { position: relative; height: 300px; }
+        .data-table { font-size: 0.875rem; }
+        .data-table th { background: var(--swift-white); font-weight: 600; color: var(--swift-navy); }
+        .data-table td, .data-table th { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; }
+        .data-table tr:hover { background: rgba(255,153,0,0.05); }
+        .toggle-btn {
+            transition: all 0.2s;
+            border: 1px solid var(--swift-slate);
+            color: var(--swift-slate);
+        }
+        .toggle-btn:hover {
+            background: rgba(255,153,0,0.1);
+        }
+        .toggle-btn.active {
+            background: var(--swift-orange);
+            color: var(--swift-navy);
+            border-color: var(--swift-orange);
+            font-weight: 600;
+        }
+        .methodology-note {
+            background: rgba(255,153,0,0.1);
+            border-left: 4px solid var(--swift-orange);
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.875rem;
+            color: var(--swift-navy);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--swift-white); }
+        ::-webkit-scrollbar-thumb { background: var(--swift-slate); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--swift-navy); }
+
+        /* KPI icon backgrounds */
+        .kpi-icon-revenue { background: rgba(255,153,0,0.15); }
+        .kpi-icon-revenue svg { color: var(--swift-orange); }
+        .kpi-icon-profit { background: rgba(0,168,107,0.15); }
+        .kpi-icon-profit svg { color: var(--swift-success); }
+        .kpi-icon-opex { background: rgba(55,71,90,0.15); }
+        .kpi-icon-opex svg { color: var(--swift-slate); }
+        .kpi-icon-cash { background: rgba(0,126,185,0.15); }
+        .kpi-icon-cash svg { color: var(--swift-info); }
+
+        /* Section headers */
+        .section-title {
+            color: var(--swift-navy);
+            font-weight: 700;
+            position: relative;
+            padding-left: 12px;
+        }
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 70%;
+            background: var(--swift-orange);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="shadow-lg" style="background: linear-gradient(135deg, #232F3E 0%, #37475A 100%);">
+        <div class="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: #FF9900;">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-white tracking-tight">SwiftStart Agency</h1>
+                        <p class="text-sm" style="color: #FF9900;">Financial Dashboard - 2025</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex rounded-lg overflow-hidden">
+                        <button id="btn-usd" class="toggle-btn active px-4 py-2 text-sm font-medium">USD</button>
+                        <button id="btn-cad" class="toggle-btn px-4 py-2 text-sm font-medium">CAD</button>
+                    </div>
+                    <select id="month-selector" class="border-0 rounded-lg px-4 py-2 text-sm font-medium" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,153,0,0.5);">
+                        <option value="all" style="background: #232F3E;">Full Year 2025</option>
+                        <option value="Jan" style="background: #232F3E;">January</option>
+                        <option value="Feb" style="background: #232F3E;">February</option>
+                        <option value="Mar" style="background: #232F3E;">March</option>
+                        <option value="Apr" style="background: #232F3E;">April</option>
+                        <option value="May" style="background: #232F3E;">May</option>
+                        <option value="Jun" style="background: #232F3E;">June</option>
+                        <option value="Jul" style="background: #232F3E;">July</option>
+                        <option value="Aug" style="background: #232F3E;">August</option>
+                        <option value="Sep" style="background: #232F3E;">September</option>
+                        <option value="Oct" style="background: #232F3E;">October</option>
+                        <option value="Nov" style="background: #232F3E;">November</option>
+                        <option value="Dec" style="background: #232F3E;">December</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <!-- Methodology Note -->
+        <div class="methodology-note">
+            <strong>Revenue Recognition Note:</strong> This dashboard reflects the management view where revenue is recorded in the month services were rendered. Invoices issued in the first week of Month+1 are booked to the prior month (e.g., Jan 1-7 invoices appear in December). This differs from Xero which books on invoice date.
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium" style="color: #37475A;">Total Revenue (YTD)</p>
+                        <p class="text-3xl font-bold" style="color: #232F3E;" id="total-revenue">$1,361,766</p>
+                        <p class="text-sm mt-1" style="color: #37475A;">Avg: <span id="avg-revenue" class="font-semibold">$113,481</span>/mo</p>
+                    </div>
+                    <div class="w-12 h-12 kpi-icon-revenue rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium" style="color: #37475A;">Net Profit (YTD)</p>
+                        <p class="text-3xl font-bold profit-positive" id="total-profit">$397,656</p>
+                        <p class="text-sm mt-1" style="color: #37475A;">Margin: <span id="profit-margin" class="font-semibold">29.2%</span></p>
+                    </div>
+                    <div class="w-12 h-12 kpi-icon-profit rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium" style="color: #37475A;">Operating Expenses (YTD)</p>
+                        <p class="text-3xl font-bold" style="color: #232F3E;" id="total-opex">$964,110</p>
+                        <p class="text-sm mt-1" style="color: #37475A;">Ratio: <span id="opex-ratio" class="font-semibold">70.8%</span></p>
+                    </div>
+                    <div class="w-12 h-12 kpi-icon-opex rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium" style="color: #37475A;">Cash Position</p>
+                        <p class="text-3xl font-bold" style="color: #232F3E;" id="cash-position">$85,943</p>
+                        <p class="text-sm mt-1" style="color: #37475A;">Net Assets: <span id="net-assets" class="font-semibold">$91,281</span></p>
+                    </div>
+                    <div class="w-12 h-12 kpi-icon-cash rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="card p-6">
+                <h3 class="text-lg section-title mb-4">Revenue & Profit Trend</h3>
+                <div class="chart-container">
+                    <canvas id="revenueProfitChart"></canvas>
+                </div>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-lg section-title mb-4">Revenue by Stream</h3>
+                <div class="chart-container">
+                    <canvas id="revenueStreamChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="card p-6">
+                <h3 class="text-lg section-title mb-4">Expense Breakdown</h3>
+                <div class="chart-container">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-lg section-title mb-4">Operating Margin Trend</h3>
+                <div class="chart-container">
+                    <canvas id="marginChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Stream Breakdown -->
+        <div class="card p-6 mb-8">
+            <h3 class="text-lg section-title mb-4">Monthly Revenue by Stream</h3>
+            <div class="chart-container" style="height: 350px;">
+                <canvas id="revenueStackedChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Monthly Data Table -->
+        <div class="card p-6 mb-8">
+            <h3 class="text-lg section-title mb-4">Monthly Financial Summary</h3>
+            <div class="overflow-x-auto">
+                <table class="data-table w-full">
+                    <thead>
+                        <tr>
+                            <th class="text-left">Month</th>
+                            <th class="text-right">Revenue</th>
+                            <th class="text-right">Amazon Services</th>
+                            <th class="text-right">Commission</th>
+                            <th class="text-right">Operating Exp</th>
+                            <th class="text-right">Net Profit</th>
+                            <th class="text-right">Margin</th>
+                            <th class="text-right">MoM Change</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthly-table-body">
+                    </tbody>
+                    <tfoot class="bg-gray-100 font-semibold">
+                        <tr>
+                            <td>Total / Avg</td>
+                            <td class="text-right" id="total-row-revenue">$1,361,766</td>
+                            <td class="text-right" id="total-row-amazon">$1,106,223</td>
+                            <td class="text-right" id="total-row-commission">$166,491</td>
+                            <td class="text-right" id="total-row-opex">$964,110</td>
+                            <td class="text-right" id="total-row-profit">$397,656</td>
+                            <td class="text-right" id="total-row-margin">29.2%</td>
+                            <td class="text-right">-</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Expense Details -->
+        <div class="card p-6 mb-8">
+            <h3 class="text-lg section-title mb-4">Operating Expense Details (YTD)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="expense-details">
+            </div>
+        </div>
+
+        <!-- Balance Sheet Summary -->
+        <div class="card p-6">
+            <h3 class="text-lg section-title mb-4">Balance Sheet Position (Latest: December 2025)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <h4 class="text-sm font-semibold uppercase mb-3" style="color: #FF9900;">Assets</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Mercury (USD)</span>
+                            <span class="font-medium" id="bs-mercury">$71,524</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Wise (USD)</span>
+                            <span class="font-medium" id="bs-wise-usd">$14,419</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Trade Receivables</span>
+                            <span class="font-medium" id="bs-receivables">$65,787</span>
+                        </div>
+                        <div class="flex justify-between border-t pt-2 mt-2">
+                            <span class="font-semibold">Total Assets</span>
+                            <span class="font-bold" id="bs-total-assets">$158,712</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold uppercase mb-3" style="color: #37475A;">Liabilities</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Amex Balance (CAD)</span>
+                            <span class="font-medium" id="bs-amex">$12,777</span>
+                        </div>
+                        <div class="flex justify-between border-t pt-2 mt-2">
+                            <span class="font-semibold">Total Liabilities</span>
+                            <span class="font-bold" id="bs-total-liab">$12,777</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold uppercase mb-3" style="color: #00A86B;">Net Position</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Net Assets (USD)</span>
+                            <span class="font-medium profit-positive" id="bs-net-usd">$91,281</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Net Assets (CAD)</span>
+                            <span class="font-medium" id="bs-net-cad">-$4,296</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8" style="background: linear-gradient(135deg, #232F3E 0%, #37475A 100%);">
+        <div class="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 rounded flex items-center justify-center" style="background: #FF9900;">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-sm font-semibold text-white">SwiftStart Agency</span>
+                </div>
+                <p class="text-sm" style="color: rgba(255,255,255,0.7);">
+                    Financial Dashboard | Generated: January 2026 | Data Period: Jan-Dec 2025
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Financial Data
+        const monthlyData = [
+            { month: 'Jan', revenue: 112537.18, amazon: 80100, commission: 25254.76, google: 4000, other: 3182.42, opex: 79788.92, profit: 32748.26, payroll: 55696.55, it: 12551.23, bank: 2466.41, legal: 5950, marketing: 1391.67, office: 563.55, rent: 531.84 },
+            { month: 'Feb', revenue: 126227.65, amazon: 92400, commission: 21119.85, google: 4000, other: 8707.80, opex: 70570.24, profit: 55657.41, payroll: 46892.31, it: 10829.84, bank: 2122.89, legal: 5950, marketing: 0, office: 404.47, rent: 531.93 },
+            { month: 'Mar', revenue: 115199.88, amazon: 93650, commission: 8833.11, google: 4000, other: 8716.77, opex: 79011.74, profit: 36188.14, payroll: 55456.22, it: 10785.88, bank: 2057.78, legal: 5950, marketing: 0, office: 494.48, rent: 530.46 },
+            { month: 'Apr', revenue: 118116.73, amazon: 101400, commission: 9068.46, google: 4000, other: 3648.27, opex: 78014.09, profit: 40102.64, payroll: 54247.42, it: 10803.98, bank: 2247.78, legal: 5950, marketing: 0, office: 449.71, rent: 531.70 },
+            { month: 'May', revenue: 128620.74, amazon: 103900, commission: 18864.35, google: 4000, other: 1856.39, opex: 89774.39, profit: 38846.35, payroll: 64862.82, it: 11197.42, bank: 2947.82, legal: 5950, marketing: 0, office: 589.93, rent: 481.44 },
+            { month: 'Jun', revenue: 125207.61, amazon: 100150, commission: 18029.09, google: 4000, other: 3028.52, opex: 81193.75, profit: 44013.86, payroll: 56854.91, it: 10896.60, bank: 2684.85, legal: 5950, marketing: 0, office: 494.24, rent: 532.08 },
+            { month: 'Jul', revenue: 108314.33, amazon: 79623.12, commission: 22485.67, google: 4000, other: 2205.54, opex: 82095.94, profit: 26218.39, payroll: 59316.96, it: 10156.18, bank: 2207.12, legal: 5950, marketing: 0, office: 249.90, rent: 483.88 },
+            { month: 'Aug', revenue: 107530.34, amazon: 83400, commission: 12281.18, google: 4000, other: 7849.16, opex: 89051.38, profit: 18478.96, payroll: 64889.89, it: 10620.06, bank: 2800.07, legal: 5950, marketing: 0, office: 491.78, rent: 582.27 },
+            { month: 'Sep', revenue: 77707.85, amazon: 79900, commission: -4242.07, google: 4000, other: -1949.18, opex: 77206.92, profit: 500.93, payroll: 54688.71, it: 10239.97, bank: 2014.77, legal: 5950, marketing: 0, office: 249.17, rent: 482.42 },
+            { month: 'Oct', revenue: 113857.80, amazon: 96900, commission: 11109.69, google: 4000, other: 1848.11, opex: 77547.74, profit: 36310.06, payroll: 54430.09, it: 10380.09, bank: 2338.05, legal: 5950, marketing: 0, office: 306.46, rent: 480.97 },
+            { month: 'Nov', revenue: 103821.16, amazon: 90400, commission: 8770.78, google: 4000, other: 650.38, opex: 76933.40, profit: 26887.76, payroll: 54026.35, it: 10391.65, bank: 2197.78, legal: 5950, marketing: 0, office: 229.11, rent: 481.98 },
+            { month: 'Dec', revenue: 124625.22, amazon: 104400, commission: 14916.00, google: 4000, other: 933.80, opex: 82921.57, profit: 41703.65, payroll: 57632.20, it: 10875.16, bank: 2528.59, legal: 5950, marketing: 0, office: 346.84, rent: 481.03 }
+        ];
+
+        const balanceSheet = {
+            mercury_usd: 71524.43,
+            wise_usd: 14419.40,
+            wise_cad: 8481.14,
+            trade_receivables: 65787.14,
+            total_assets_usd: 158712.13,
+            amex_cad: 12776.66,
+            total_liabilities_cad: 12776.66,
+            net_assets_usd: 91280.71,
+            net_assets_cad: -4295.52
+        };
+
+        let currentCurrency = 'USD';
+        const CAD_RATE = 1.44; // Average 2025 rate
+
+        // Format currency
+        function formatCurrency(value, currency = currentCurrency) {
+            const val = currency === 'CAD' ? value * CAD_RATE : value;
+            return '$' + Math.round(val).toLocaleString();
+        }
+
+        function formatCurrencyFull(value, currency = currentCurrency) {
+            const val = currency === 'CAD' ? value * CAD_RATE : value;
+            return '$' + val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        // Update KPI Cards
+        function updateKPIs() {
+            const totalRevenue = monthlyData.reduce((sum, m) => sum + m.revenue, 0);
+            const totalProfit = monthlyData.reduce((sum, m) => sum + m.profit, 0);
+            const totalOpex = monthlyData.reduce((sum, m) => sum + m.opex, 0);
+
+            document.getElementById('total-revenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('avg-revenue').textContent = formatCurrency(totalRevenue / 12);
+            document.getElementById('total-profit').textContent = formatCurrency(totalProfit);
+            document.getElementById('profit-margin').textContent = ((totalProfit / totalRevenue) * 100).toFixed(1) + '%';
+            document.getElementById('total-opex').textContent = formatCurrency(totalOpex);
+            document.getElementById('opex-ratio').textContent = ((totalOpex / totalRevenue) * 100).toFixed(1) + '%';
+            document.getElementById('cash-position').textContent = formatCurrency(balanceSheet.mercury_usd + balanceSheet.wise_usd);
+            document.getElementById('net-assets').textContent = formatCurrency(balanceSheet.net_assets_usd);
+        }
+
+        // Populate Monthly Table
+        function populateTable() {
+            const tbody = document.getElementById('monthly-table-body');
+            tbody.innerHTML = '';
+
+            monthlyData.forEach((row, index) => {
+                const momChange = index > 0 ? ((row.revenue - monthlyData[index-1].revenue) / monthlyData[index-1].revenue * 100).toFixed(1) : '-';
+                const margin = ((row.profit / row.revenue) * 100).toFixed(1);
+                const profitClass = row.profit >= 0 ? 'profit-positive' : 'profit-negative';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="font-medium">${row.month} 2025</td>
+                    <td class="text-right">${formatCurrency(row.revenue)}</td>
+                    <td class="text-right">${formatCurrency(row.amazon)}</td>
+                    <td class="text-right ${row.commission < 0 ? 'profit-negative' : ''}">${formatCurrency(row.commission)}</td>
+                    <td class="text-right">${formatCurrency(row.opex)}</td>
+                    <td class="text-right ${profitClass}">${formatCurrency(row.profit)}</td>
+                    <td class="text-right">${margin}%</td>
+                    <td class="text-right ${momChange !== '-' && parseFloat(momChange) >= 0 ? 'profit-positive' : momChange !== '-' ? 'profit-negative' : ''}">${momChange !== '-' ? momChange + '%' : '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Update totals
+            const totalRevenue = monthlyData.reduce((sum, m) => sum + m.revenue, 0);
+            const totalAmazon = monthlyData.reduce((sum, m) => sum + m.amazon, 0);
+            const totalCommission = monthlyData.reduce((sum, m) => sum + m.commission, 0);
+            const totalOpex = monthlyData.reduce((sum, m) => sum + m.opex, 0);
+            const totalProfit = monthlyData.reduce((sum, m) => sum + m.profit, 0);
+
+            document.getElementById('total-row-revenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('total-row-amazon').textContent = formatCurrency(totalAmazon);
+            document.getElementById('total-row-commission').textContent = formatCurrency(totalCommission);
+            document.getElementById('total-row-opex').textContent = formatCurrency(totalOpex);
+            document.getElementById('total-row-profit').textContent = formatCurrency(totalProfit);
+            document.getElementById('total-row-margin').textContent = ((totalProfit / totalRevenue) * 100).toFixed(1) + '%';
+        }
+
+        // Populate Expense Details
+        function populateExpenseDetails() {
+            const container = document.getElementById('expense-details');
+
+            const expenses = [
+                { name: 'Payroll', total: monthlyData.reduce((sum, m) => sum + m.payroll, 0), icon: '👥' },
+                { name: 'I.T. & Software', total: monthlyData.reduce((sum, m) => sum + m.it, 0), icon: '💻' },
+                { name: 'Legal & Professional', total: monthlyData.reduce((sum, m) => sum + m.legal, 0), icon: '⚖️' },
+                { name: 'Bank Charges', total: monthlyData.reduce((sum, m) => sum + m.bank, 0), icon: '🏦' },
+                { name: 'Office Expenses', total: monthlyData.reduce((sum, m) => sum + m.office, 0), icon: '🏢' },
+                { name: 'Rent', total: monthlyData.reduce((sum, m) => sum + m.rent, 0), icon: '🏠' },
+                { name: 'Marketing', total: monthlyData.reduce((sum, m) => sum + m.marketing, 0), icon: '📢' },
+            ];
+
+            const totalOpex = monthlyData.reduce((sum, m) => sum + m.opex, 0);
+
+            container.innerHTML = expenses.map(exp => `
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-600">${exp.name}</span>
+                        <span class="text-lg">${exp.icon}</span>
+                    </div>
+                    <p class="text-xl font-bold text-gray-900">${formatCurrency(exp.total)}</p>
+                    <p class="text-sm text-gray-500">${((exp.total / totalOpex) * 100).toFixed(1)}% of OpEx</p>
+                </div>
+            `).join('');
+        }
+
+        // Update Balance Sheet
+        function updateBalanceSheet() {
+            document.getElementById('bs-mercury').textContent = formatCurrency(balanceSheet.mercury_usd);
+            document.getElementById('bs-wise-usd').textContent = formatCurrency(balanceSheet.wise_usd);
+            document.getElementById('bs-receivables').textContent = formatCurrency(balanceSheet.trade_receivables);
+            document.getElementById('bs-total-assets').textContent = formatCurrency(balanceSheet.total_assets_usd);
+            document.getElementById('bs-amex').textContent = 'C$' + Math.round(balanceSheet.amex_cad).toLocaleString();
+            document.getElementById('bs-total-liab').textContent = 'C$' + Math.round(balanceSheet.total_liabilities_cad).toLocaleString();
+            document.getElementById('bs-net-usd').textContent = formatCurrency(balanceSheet.net_assets_usd);
+            document.getElementById('bs-net-cad').textContent = 'C$' + Math.round(balanceSheet.net_assets_cad).toLocaleString();
+        }
+
+        // Charts
+        let revenueProfitChart, revenueStreamChart, expenseChart, marginChart, revenueStackedChart;
+
+        function initCharts() {
+            const months = monthlyData.map(m => m.month);
+
+            // Revenue & Profit Chart - SwiftStart Theme
+            const ctx1 = document.getElementById('revenueProfitChart').getContext('2d');
+            revenueProfitChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: monthlyData.map(m => m.revenue),
+                            borderColor: '#FF9900',
+                            backgroundColor: 'rgba(255, 153, 0, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'Net Profit',
+                            data: monthlyData.map(m => m.profit),
+                            borderColor: '#00A86B',
+                            backgroundColor: 'rgba(0, 168, 107, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Operating Expenses',
+                            data: monthlyData.map(m => m.opex),
+                            borderColor: '#37475A',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => '$' + (value/1000).toFixed(0) + 'K'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Revenue Stream Donut
+            const totalAmazon = monthlyData.reduce((sum, m) => sum + m.amazon, 0);
+            const totalCommission = monthlyData.reduce((sum, m) => sum + m.commission, 0);
+            const totalGoogle = monthlyData.reduce((sum, m) => sum + m.google, 0);
+            const totalOther = monthlyData.reduce((sum, m) => sum + m.other, 0);
+
+            const ctx2 = document.getElementById('revenueStreamChart').getContext('2d');
+            revenueStreamChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Amazon Services', 'Commission', 'Google Services', 'Other Income'],
+                    datasets: [{
+                        data: [totalAmazon, totalCommission, totalGoogle, totalOther],
+                        backgroundColor: ['#FF9900', '#00A86B', '#007EB9', '#37475A'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+
+            // Expense Chart
+            const totalPayroll = monthlyData.reduce((sum, m) => sum + m.payroll, 0);
+            const totalIT = monthlyData.reduce((sum, m) => sum + m.it, 0);
+            const totalLegal = monthlyData.reduce((sum, m) => sum + m.legal, 0);
+            const totalBank = monthlyData.reduce((sum, m) => sum + m.bank, 0);
+            const totalOpex = monthlyData.reduce((sum, m) => sum + m.opex, 0);
+            const otherOpex = totalOpex - totalPayroll - totalIT - totalLegal - totalBank;
+
+            const ctx3 = document.getElementById('expenseChart').getContext('2d');
+            expenseChart = new Chart(ctx3, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Payroll', 'I.T. & Software', 'Legal & Professional', 'Bank Charges', 'Other'],
+                    datasets: [{
+                        data: [totalPayroll, totalIT, totalLegal, totalBank, otherOpex],
+                        backgroundColor: ['#232F3E', '#FF9900', '#007EB9', '#00A86B', '#9CA3AF'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+
+            // Margin Chart - SwiftStart Theme
+            const ctx4 = document.getElementById('marginChart').getContext('2d');
+            marginChart = new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Operating Margin %',
+                        data: monthlyData.map(m => ((m.profit / m.revenue) * 100).toFixed(1)),
+                        backgroundColor: monthlyData.map(m => m.profit >= 0 ? 'rgba(0, 168, 107, 0.7)' : 'rgba(209, 50, 18, 0.7)'),
+                        borderColor: monthlyData.map(m => m.profit >= 0 ? '#00A86B' : '#D13212'),
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => value + '%'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Revenue Stacked Bar Chart - SwiftStart Theme
+            const ctx5 = document.getElementById('revenueStackedChart').getContext('2d');
+            revenueStackedChart = new Chart(ctx5, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Amazon Services',
+                            data: monthlyData.map(m => m.amazon),
+                            backgroundColor: '#FF9900',
+                            borderRadius: 2
+                        },
+                        {
+                            label: 'Commission',
+                            data: monthlyData.map(m => Math.max(0, m.commission)),
+                            backgroundColor: '#00A86B',
+                            borderRadius: 2
+                        },
+                        {
+                            label: 'Google Services',
+                            data: monthlyData.map(m => m.google),
+                            backgroundColor: '#007EB9',
+                            borderRadius: 2
+                        },
+                        {
+                            label: 'Other Income',
+                            data: monthlyData.map(m => Math.max(0, m.other)),
+                            backgroundColor: '#37475A',
+                            borderRadius: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            ticks: {
+                                callback: value => '$' + (value/1000).toFixed(0) + 'K'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Currency Toggle
+        document.getElementById('btn-usd').addEventListener('click', function() {
+            currentCurrency = 'USD';
+            document.getElementById('btn-usd').classList.add('active');
+            document.getElementById('btn-cad').classList.remove('active');
+            updateAll();
+        });
+
+        document.getElementById('btn-cad').addEventListener('click', function() {
+            currentCurrency = 'CAD';
+            document.getElementById('btn-cad').classList.add('active');
+            document.getElementById('btn-usd').classList.remove('active');
+            updateAll();
+        });
+
+        function updateAll() {
+            updateKPIs();
+            populateTable();
+            populateExpenseDetails();
+            updateBalanceSheet();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAll();
+            initCharts();
+        });
+    </script>
+</body>
+</html>
